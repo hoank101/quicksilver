@@ -136,7 +136,7 @@ export const StakingProcessModal: React.FC<StakingModalProps> = ({ isOpen, onClo
   useEffect(() => {
     // Update the state when selectedValidators changes
     setIsCustomValid(selectedValidators.length === 0);
-  }, [selectedValidators, calculateIntents]);
+  }, [selectedValidators]);
 
   // Modify the handleWeightChange function
   const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>, validatorName: string) => {
@@ -182,7 +182,7 @@ export const StakingProcessModal: React.FC<StakingModalProps> = ({ isOpen, onClo
         }));
       }
     }
-  }, [selectedValidators, weights, useDefaultWeights]);
+  }, [selectedValidators, weights, useDefaultWeights, calculateIntents]);
 
   interface ValidatorsSelect {
     address: string;
