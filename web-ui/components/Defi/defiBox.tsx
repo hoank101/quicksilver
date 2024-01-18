@@ -19,7 +19,7 @@ import {
   Spinner,
   useMediaQuery,
 } from '@chakra-ui/react';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 import { useDefiData } from '@/hooks/useQueries';
 
@@ -71,20 +71,7 @@ const DefiTable = () => {
   const handleFilterClick = (filter: string) => {
     setActiveFilter(filter);
   };
-  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 1274);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 1274);
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    // Clean up
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
+  const [isMobile] = useMediaQuery('(min-width:600px)');
   const filteredData = defi ? defi.filter(filterCategories[activeFilter]) : [];
 
   type ProviderKey = 'osmosis' | 'ux' | 'shade';

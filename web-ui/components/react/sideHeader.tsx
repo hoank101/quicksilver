@@ -29,7 +29,6 @@ import { DrawerControlProvider } from '@/state/chains/drawerControlProvider';
 
 import { WalletButton } from '../wallet-button';
 
-
 export const SideHeader = () => {
   const router = useRouter();
   const [selectedPage, setSelectedPage] = useState('');

@@ -6,7 +6,7 @@ import {
   useColorModeValue,
   Image,
   Icon,
-  useBreakpointValue,
+  //useBreakpointValue,
   SystemStyleObject,
   SkeletonCircle,
   Skeleton,
@@ -28,7 +28,7 @@ const SkeletonOptions = () => {
 };
 
 const SelectOptions = ({ data, value, onChange }: ChangeChainMenuType) => {
-  const menuHeight = useBreakpointValue({ base: 60, md: 56 });
+  const menuHeight = 60 // useBreakpointValue({ base: 60, md: 56 });
   const customStyles = {
     control: (provided: SystemStyleObject) => ({
       ...provided,

@@ -1,6 +1,6 @@
 import '../styles/globals.css';
 import { Chain } from '@chain-registry/types';
-import { Box, ChakraProvider, Flex } from '@chakra-ui/react';
+import { Box, ChakraBaseProvider, Flex } from '@chakra-ui/react';
 import { ibcAminoConverters, ibcProtoRegistry } from '@chalabi/quicksilverjs';
 import { Registry } from '@cosmjs/proto-signing';
 import { SigningStargateClientOptions, AminoTypes } from '@cosmjs/stargate';
@@ -222,7 +222,7 @@ function QuickApp({ Component, pageProps }: AppProps) {
   };
 
   return (
-    <ChakraProvider theme={defaultTheme}>
+    <ChakraBaseProvider theme={defaultTheme}>
       <ChainProvider
         endpointOptions={{
           isLazy: true,
@@ -295,7 +295,7 @@ function QuickApp({ Component, pageProps }: AppProps) {
           </Box>
         </QueryClientProvider>
       </ChainProvider>
-    </ChakraProvider>
+    </ChakraBaseProvider>
   );
 }
 
