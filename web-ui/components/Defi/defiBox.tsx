@@ -17,7 +17,7 @@ import {
   Tooltip,
   Center,
   Spinner,
-  useBreakpointValue,
+  useMediaQuery,
 } from '@chakra-ui/react';
 import React, { useState } from 'react';
 
@@ -70,7 +70,7 @@ const DefiTable = () => {
   const handleFilterClick = (filter: string) => {
     setActiveFilter(filter);
   };
-  const isMobile = useBreakpointValue({ base: true, sm: true, md: false });
+  const isMobile = useMediaQuery("(max-width: 768px)")
   const filteredData = defi ? defi.filter(filterCategories[activeFilter]) : [];
 
   type ProviderKey = 'osmosis' | 'ux' | 'shade';
