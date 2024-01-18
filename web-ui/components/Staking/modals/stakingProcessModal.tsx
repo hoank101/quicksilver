@@ -136,7 +136,7 @@ export const StakingProcessModal: React.FC<StakingModalProps> = ({ isOpen, onClo
   useEffect(() => {
     // Update the state when selectedValidators changes
     setIsCustomValid(selectedValidators.length === 0);
-  }, [selectedValidators]);
+  }, [selectedValidators, calculateIntents]);
 
   // Modify the handleWeightChange function
   const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>, validatorName: string) => {
