@@ -144,12 +144,14 @@ func (k *Keeper) GetUnlockedTokensForZone(ctx sdk.Context, zone *types.Zone) (ma
 		}
 	}
 
+	k.Logger(ctx).Error("avail per val", availablePerValidator)
 	return availablePerValidator, total, nil
 }
 
 // HandleQueuedUnbondings is called once per epoch to aggregate all queued unbondings into
 // a single unbond transaction per delegation.
 func (k *Keeper) HandleQueuedUnbondings(ctx sdk.Context, zone *types.Zone, epoch int64) error {
+	k.Logger(ctx).Error("Handle queued for zone", "zone", zone.ChainId)
 	// out here will only ever be in native bond denom
 	coinsOutPerValidator := make(map[string]sdk.Coin, 0)
 	// list of withdrawal tx hashes per validator
@@ -170,6 +172,7 @@ func (k *Keeper) HandleQueuedUnbondings(ctx sdk.Context, zone *types.Zone, epoch
 		return err
 	}
 
+	k.Logger(ctx).Error("summary", "to_withdraw", totalToWithdraw, "avail", totalAvailable)
 	// iterate all withdrawal records for the zone in the QUEUED state.
 	k.IterateZoneStatusWithdrawalRecords(ctx, zone.ChainId, types.WithdrawStatusQueued, func(idx int64, withdrawal types.WithdrawalRecord) bool {
 		k.Logger(ctx).Info("handling queued withdrawal request", "from", withdrawal.Delegator, "to", withdrawal.Recipient, "amount", withdrawal.Amount)
@@ -217,6 +220,7 @@ func (k *Keeper) HandleQueuedUnbondings(ctx sdk.Context, zone *types.Zone, epoch
 	if err != nil {
 		return err
 	}
+	k.Logger(ctx).Error("allocatedForWithdrawalPerVal", tokensAllocatedForWithdrawalPerValidator)
 	valopers := utils.Keys(tokensAllocatedForWithdrawalPerValidator)
 	// set current source validator to zero.
 	vidx := 0
@@ -224,18 +228,21 @@ func (k *Keeper) HandleQueuedUnbondings(ctx sdk.Context, zone *types.Zone, epoch
 WITHDRAWAL:
 	for _, hash := range utils.Keys(amountToWithdrawPerWithdrawal) {
 		for {
+			k.Logger(ctx).Error("allocation attempt", "val", v, "allocated", tokensAllocatedForWithdrawalPerValidator[v], "hash", hash, "amountToWithdrawPerWithdrawal", amountToWithdrawPerWithdrawal[hash])
 			// if amountToWithdrawPerWithdrawal has been satisified, then continue.
 			if amountToWithdrawPerWithdrawal[hash].Amount.IsZero() {
+				k.Logger(ctx).Error("amountToWithdrawPerWithdrawal is zero; next...")
 				continue WITHDRAWAL
 			}
 
 			// if current selected validator allocation for withdrawal can satisfy this withdrawal in totality...
 			if tokensAllocatedForWithdrawalPerValidator[v].GTE(amountToWithdrawPerWithdrawal[hash].Amount) {
+				k.Logger(ctx).Error("val can satisfy for hash", "valAmount", tokensAllocatedForWithdrawalPerValidator[v], "amount", amountToWithdrawPerWithdrawal[hash].Amount)
 				// sub current withdrawal amount from allocation.
 				tokensAllocatedForWithdrawalPerValidator[v] = tokensAllocatedForWithdrawalPerValidator[v].Sub(amountToWithdrawPerWithdrawal[hash].Amount)
 				// create a distribution from this validator for the withdrawal
 				distributionsPerWithdrawal[hash] = append(distributionsPerWithdrawal[hash], &types.Distribution{Valoper: v, Amount: amountToWithdrawPerWithdrawal[hash].Amount.Uint64()})
-
+				k.Logger(ctx).Error("new vals", "dist", distributionsPerWithdrawal[hash], "val", tokensAllocatedForWithdrawalPerValidator[v])
 				// add the amount and hash to per validator records
 				existing, found := coinsOutPerValidator[v]
 				if !found {
@@ -249,9 +256,12 @@ WITHDRAWAL:
 
 				// set withdrawal amount to zero, and continue to outer loop (next withdrawal record).
 				amountToWithdrawPerWithdrawal[hash] = sdk.NewCoin(amountToWithdrawPerWithdrawal[hash].Denom, sdk.ZeroInt())
+				k.Logger(ctx).Error("new vals", "dist", distributionsPerWithdrawal[hash], "val", tokensAllocatedForWithdrawalPerValidator[v], "coinsOut", coinsOutPerValidator[v], "hashes", txHashesPerValidator[v], "remainingWithdrawal", amountToWithdrawPerWithdrawal[hash])
+
 				continue WITHDRAWAL
 			}
 
+			k.Logger(ctx).Error("val cannot satisfy for hash", "valAmount", tokensAllocatedForWithdrawalPerValidator[v], "amount", amountToWithdrawPerWithdrawal[hash].Amount)
 			// otherwise (current validator allocation cannot wholly satisfy current record), allocate entire allocation to this withdrawal.
 			distributionsPerWithdrawal[hash] = append(distributionsPerWithdrawal[hash], &types.Distribution{Valoper: v, Amount: tokensAllocatedForWithdrawalPerValidator[v].Uint64()})
 			amountToWithdrawPerWithdrawal[hash] = sdk.NewCoin(amountToWithdrawPerWithdrawal[hash].Denom, amountToWithdrawPerWithdrawal[hash].Amount.Sub(tokensAllocatedForWithdrawalPerValidator[v]))
@@ -263,13 +273,16 @@ WITHDRAWAL:
 				coinsOutPerValidator[v] = existing.Add(sdk.NewCoin(zone.BaseDenom, tokensAllocatedForWithdrawalPerValidator[v]))
 				txHashesPerValidator[v] = append(txHashesPerValidator[v], hash)
 			}
-
 			// set current val to zero.
 			tokensAllocatedForWithdrawalPerValidator[v] = sdk.ZeroInt()
+
+			k.Logger(ctx).Error("new vals (2)", "dist", distributionsPerWithdrawal[hash], "val", tokensAllocatedForWithdrawalPerValidator[v], "coinsOut", coinsOutPerValidator[v], "hashes", txHashesPerValidator[v], "remainingWithdrawal", amountToWithdrawPerWithdrawal[hash])
+
 			// next validator
 			if len(valopers) > vidx+1 {
 				vidx++
 				v = valopers[vidx]
+				k.Logger(ctx).Error("next val pls...")
 			} else if !amountToWithdrawPerWithdrawal[hash].Amount.IsZero() {
 				return fmt.Errorf("unable to satisfy unbonding")
 			}
