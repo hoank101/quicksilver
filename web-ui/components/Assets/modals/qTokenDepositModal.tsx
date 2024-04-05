@@ -160,7 +160,9 @@ const QDepositModal: React.FC<QDepositModalProps> = ({ token, isOpen, onClose, i
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent bgColor="rgb(32,32,32)">
-      <ModalHeader color="white"><Text>Deposit {token} Tokens</Text>  <Divider mt={3} bgColor={'cyan.500'} /></ModalHeader>
+        <ModalHeader color="white">
+          <Text>Deposit {token} Tokens</Text> <Divider mt={3} bgColor={'cyan.500'} />
+        </ModalHeader>
         <ModalCloseButton color={'complimentary.900'} />
         <ModalBody>
           {/* Chain Selection Dropdown */}
@@ -196,32 +198,7 @@ const QDepositModal: React.FC<QDepositModalProps> = ({ token, isOpen, onClose, i
                 color={'white'}
                 placeholder="Enter amount"
               />
-              <InputRightElement>
-                <HStack mr={14} spacing={1}>
-                  <Button
-                    variant={'ghost'}
-                    color="complimentary.900"
-                    h="1.75rem"
-                    size="xs"
-                    _active={{ transform: 'scale(0.95)', color: 'complimentary.800' }}
-                    _hover={{ bgColor: 'transparent', color: 'complimentary.400' }}
-                    onClick={() => setAmount(BigNumber(parseFloat(maxAmount) / 2).toFixed(6).toString())}
-                  >
-                    Half
-                  </Button>
-                  <Button
-                    variant={'ghost'}
-                    color="complimentary.900"
-                    _active={{ transform: 'scale(0.95)', color: 'complimentary.800' }}
-                    _hover={{ bgColor: 'transparent', color: 'complimentary.400' }}
-                    h="1.75rem"
-                    size="xs"
-                    onClick={() => setAmount(BigNumber(maxAmount).toFixed(6).toString())}
-                  >
-                    Max
-                  </Button>
-                </HStack>
-              </InputRightElement>
+              <InputRightElement></InputRightElement>
             </InputGroup>
           </FormControl>
         </ModalBody>
